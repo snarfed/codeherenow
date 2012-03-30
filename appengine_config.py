@@ -36,3 +36,5 @@ def read(filename):
 # FACEBOOK_APP_SECRET = read(FACEBOOK_APP_SECRET_FILE)
 TWITTER_APP_KEY = read('twitter_app_key')
 TWITTER_APP_SECRET = read('twitter_app_secret')
+TWITTER_ACCESS_TOKEN = read('twitter_access_token')
+TWITTER_ACCESS_TOKEN_SECRET = read('twitter_access_token_secret')

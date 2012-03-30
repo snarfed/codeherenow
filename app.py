@@ -2,14 +2,14 @@
 """Serves the Code Here Now app.
 """
 
-__author__ = 'Ryan Barrett <activitystreams@ryanb.org>'
+__author__ = 'Ryan Barrett <codeherenow@ryanb.org>'
 import logging
 import os
 import urlparse
 import webapp2
 
 import appengine_config
-import activitystreams
+import codeherenow
 
 from google.appengine.ext.webapp.util import run_wsgi_app
 from google.appengine.ext.webapp import template
@@ -21,9 +21,9 @@ BASE_HEADERS = {
     appengine_config.HOST,
   }
 BASE_TEMPLATE_VARS = {
-  'domain': activitystreams.SOURCE.DOMAIN,
+  'domain': codeherenow.SOURCE.DOMAIN,
   'host': appengine_config.HOST,
-  'auth_url': activitystreams.SOURCE.AUTH_URL,
+  'auth_url': codeherenow.SOURCE.AUTH_URL,
   }
 
 
@@ -59,7 +59,7 @@ class TemplateHandler(webapp2.RequestHandler):
 class FrontPageHandler(TemplateHandler):
   """Renders and serves /, ie the front page.
   """
-  template_file = activitystreams.SOURCE.FRONT_PAGE_TEMPLATE
+  template_file = codeherenow.SOURCE.FRONT_PAGE_TEMPLATE
 
 
 class HostMetaXrdHandler(TemplateHandler):
