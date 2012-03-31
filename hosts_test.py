@@ -120,13 +120,13 @@ class GitHubTest(testutil.HandlerTest):
     self.assert_equals(set(('snarfed', 'alice')),
                        hosts.GitHub.search_users(['foo', 'bar']))
 
-  def test_get_events(self):
-    for username, event in zip(['x', 'y'], EVENTS):
-      url = 'https://api.github.com/users/%s/events/public?access_token=my_token'
-      self.expect_urlfetch(url % username, json.dumps([event.json]))
-    self.mox.ReplayAll()
+  # def test_get_events(self):
+  #   for username, event in zip(['x', 'y'], EVENTS):
+  #     url = 'https://api.github.com/users/%s/events/public?access_token=my_token'
+  #     self.expect_urlfetch(url % username, json.dumps([event.json]))
+  #   self.mox.ReplayAll()
 
-    self.assert_equals(EVENTS, hosts.GitHub.get_events(['x', 'y']))
+  #   self.assert_equals(EVENTS, hosts.GitHub.get_events(['x', 'y']))
 
   def test_search_recent_events(self):
     self.expect_urlfetch('https://api.github.com/events?access_token=my_token',

@@ -16,7 +16,7 @@ import util
 
 
 class Event(util.Struct):
-  """A source cod repository event, e.g. a commit.
+  """A source repository event, e.g. a commit.
 
   Attributes:
     json: JSON dict
@@ -38,8 +38,13 @@ class Event(util.Struct):
     elif type == 'PullRequestEvent':
       return payload['pull_request']['body']
 
+    return None
+
   def __eq__(self, other):
     return self.json == other.json
+
+  def __repr__(self):
+    return repr(self.json)
 
 
 class Host(object):
@@ -101,7 +106,8 @@ class GitHub(Host):
   def search_recent_events(phrase):
     events_json = GitHub.jsonfetch(GitHub.EVENTS_URL)
     events = [Event(json=e) for e in events_json]
-    return [e for e in events if phrase in e.message()]
+    logging.warning('@@ %r' % e.message())
+    return [e for e in events if phrase in str(e.message())]
 
   @staticmethod
   def jsonfetch(url):
