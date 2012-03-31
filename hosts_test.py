@@ -126,12 +126,10 @@ class GitHubTest(testutil.HandlerTest):
       self.expect_urlfetch(url % username, json.dumps([event.json]))
     self.mox.ReplayAll()
 
-    # ugh, this is really flaky, but can't figure out why. expected and actual
-    # objects are identical and in same order.
     self.assert_equals(EVENTS, hosts.GitHub.get_events(['x', 'y']))
 
   def test_search_recent_events(self):
     self.expect_urlfetch('https://api.github.com/events?access_token=my_token',
                          json.dumps([e.json for e in EVENTS]))
     self.mox.ReplayAll()
-    self.assertEquals([EVENTS[0]], hosts.GitHub.search_recent_events('#shbp'))
+    self.assert_equals([EVENTS[0]], hosts.GitHub.search_recent_events('#shbp'))

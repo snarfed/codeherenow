@@ -38,6 +38,9 @@ class Event(util.Struct):
     elif type == 'PullRequestEvent':
       return payload['pull_request']['body']
 
+  def __eq__(self, other):
+    return self.json == other.json
+
 
 class Host(object):
   """Abstract base class for a source code hosting provider, e.g. GitHub.
