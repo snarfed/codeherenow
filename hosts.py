@@ -15,12 +15,13 @@ import appengine_config
 import util
 
 
-class Event(object):
+class Event(util.Struct):
+  """A source cod repository event, e.g. a commit.
 
-  def __init__(self, **kwargs):
-    """Keyword args are set as attrs on this object."""
-    for key, val in kwargs.items():
-      setattr(self, key, val)
+  Attributes:
+    json: JSON dict
+  """
+  pass
 
 
 class Host(object):
@@ -65,8 +66,8 @@ class GitHub(Host):
   @staticmethod
   def get_events(usernames):
     # TODO: parallelize.
-    return itertools.chain(*[GitHub.jsonfetch(GitHub.EVENTS_URL % u)
-                             for u in usernames])
+    events = [GitHub.jsonfetch(GitHub.EVENTS_URL % u) for u in usernames]
+    return [Event(json=e) for e in itertools.chain(*events)]
 
   @staticmethod
   def jsonfetch(url):

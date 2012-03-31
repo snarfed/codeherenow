@@ -24,16 +24,11 @@ TWITTER_SEARCH_URL = ('http://search.twitter.com/search.json?'
 #                     'include_entities=true&screen_names=%s')
 
 
-class Checkin(object):
+class Checkin(util.Struct):
   """Abstract base class for a checkin.
 
   Concrete subclasses should override username(), name(), url(), etc.
   """
-
-  def __init__(self, **kwargs):
-    """Keyword args are set as attrs on this object."""
-    for key, val in kwargs.items():
-      setattr(self, key, val)
 
   def username():
     raise NotImplementedError()
@@ -43,9 +38,6 @@ class Checkin(object):
 
   def url():
     raise NotImplementedError()
-
-  def __eq__(self, other):
-    return vars(self) == vars(other)
 
 
 class Source(object):
@@ -62,13 +54,23 @@ class Source(object):
     self.handler = handler
 
   @staticmethod
-  def get_checkins_near():
-    """Returns a list of recent Checkins near the given location."""
+  def get_checkins_near(lat, lon, radius_miles):
+    """Returns a list of recent Checkins near a location.
+
+    Args:
+      lat: float
+      lon: float
+      radius_miles: float
+    """
     raise NotImplementedError()
 
   @staticmethod
-  def search_checkins():
-    """Returns a list of recent Checkins that match the given search query."""
+  def search_checkins(query):
+    """Returns a list of recent Checkins that match a search query.
+
+    Args:
+      query: string
+    """
     raise NotImplementedError()
 
 
@@ -76,7 +78,7 @@ class Twitter(Source):
 
   @staticmethod
   def get_checkins_near(lat, lon, radius_miles):
-    """Returns a list of recent Checkins near the given location.
+    """Returns a list of recent Checkins near a location.
 
     Args:
       lat: float
@@ -88,7 +90,7 @@ class Twitter(Source):
 
   @staticmethod
   def search_checkins(query):
-    """Returns a list of recent Checkins that match the given search query.
+    """Returns a list of recent Checkins that match a search query.
 
     Args:
       query: string

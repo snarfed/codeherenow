@@ -1,30 +1,18 @@
 #!/usr/bin/env python
-"""Serves the Code Here Now app.
+"""Serves the front page.
 """
 
 __author__ = 'Ryan Barrett <codeherenow@ryanb.org>'
+
 import logging
 import os
 import urlparse
 import webapp2
 
 import appengine_config
-import codeherenow
 
 from google.appengine.ext.webapp.util import run_wsgi_app
 from google.appengine.ext.webapp import template
-
-# Included in most static HTTP responses.
-BASE_HEADERS = {
-  'Cache-Control': 'max-age=300',
-  'X-XRDS-Location': 'https://%s/.well-known/host-meta.xrds' %
-    appengine_config.HOST,
-  }
-BASE_TEMPLATE_VARS = {
-  'domain': codeherenow.SOURCE.DOMAIN,
-  'host': appengine_config.HOST,
-  'auth_url': codeherenow.SOURCE.AUTH_URL,
-  }
 
 
 class TemplateHandler(webapp2.RequestHandler):

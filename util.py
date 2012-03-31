@@ -15,6 +15,17 @@ from webob import exc
 from google.appengine.api import urlfetch
 
 
+class Struct(object):
+
+  def __init__(self, **kwargs):
+    """Keyword args are set as attrs on this object."""
+    for key, val in kwargs.items():
+      setattr(self, key, val)
+
+  def __eq__(self, other):
+    return vars(self) == vars(other)
+
+
 def jsonfetch(url, **kwargs):
   """Wraps urlfetch and converts to JSON.
 

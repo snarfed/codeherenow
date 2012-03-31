@@ -35,7 +35,8 @@ USERS = {u'users': [
     }
     ]}
 EVENTS = [
-  { 'type': 'PushEvent',
+  hosts.Event(json={
+    'type': 'PushEvent',
     'created_at': '2012-03-29T22:26:05Z',
     'repo': {
       'url': 'https://api.github.com/repos/soupmatt/codebreaker',
@@ -67,8 +68,9 @@ EVENTS = [
       ],
       'ref': 'refs/heads/master'
     }
-  },
-  { 'type': 'IssueCommentEvent',
+  }),
+  hosts.Event(json={
+    'type': 'IssueCommentEvent',
     'created_at': '2012-03-29T22:26:04Z',
     'repo': {
       'url': 'https://api.github.com/repos/christkv/node-mongodb-native',
@@ -99,7 +101,7 @@ EVENTS = [
       },
       'action': 'created',
     }
-  }]
+  })]
 
 
 class GitHubTest(testutil.HandlerTest):
@@ -107,6 +109,7 @@ class GitHubTest(testutil.HandlerTest):
   def setUp(self):
     super(GitHubTest, self).setUp()
     appengine_config.GITHUB_ACCESS_TOKEN = 'my_token'
+    self.expected_events = [hosts.Event(event=e) for e in EVENTS]
 
   def test_search_users(self):
     for query in 'foo', 'bar':
@@ -118,9 +121,9 @@ class GitHubTest(testutil.HandlerTest):
                        hosts.GitHub.search_users(['foo', 'bar']))
 
   def test_search_users(self):
-    for username in 'x', 'y':
+    for username, event in zip(['x', 'y'], EVENTS):
       url = 'https://api.github.com/users/%s/events/public?access_token=my_token'
-      self.expect_urlfetch(url % username, json.dumps(EVENTS))
+      self.expect_urlfetch(url % username, json.dumps(event.json))
     self.mox.ReplayAll()
 
-    self.assert_equals(EVENTS * 2, list(hosts.GitHub.get_events(['x', 'y'])))
+    self.assert_equals(EVENTS, list(hosts.GitHub.get_events(['x', 'y'])))
