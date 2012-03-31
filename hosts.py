@@ -1,105 +1,81 @@
 #!/usr/bin/python
-"""Source base class.
+"""Classes for fetching events from source code hosting services.
 """
 
 __author__ = ['Ryan Barrett <codeherenow@ryanb.org>']
 
+import cgi
 import datetime
-try:
-  import json
-except ImportError:
-  import simplejson as json
+import itertools
 import logging
-from webob import exc
+import urllib
+import urlparse
 
-from google.appengine.api import urlfetch
+import appengine_config
+import util
 
-ME = '@me'
-SELF = '@self'
-ALL = '@all'
-FRIENDS = '@friends'
-APP = '@app'
 
-class Source(object):
-  """Abstract base class for a source (e.g. Facebook, Twitter).
+class Event(object):
 
-  Concrete subclasses must override the class constants below and implement
-  get_activities().
+  def __init__(self, **kwargs):
+    """Keyword args are set as attrs on this object."""
+    for key, val in kwargs.items():
+      setattr(self, key, val)
 
-  OAuth credentials may be extracted from the current request's query parameters
-  e.g. access_token_key and access_token_secret for Twitter (OAuth 1.0a) and
-  access_token for Facebook (OAuth 2.0).
 
-  Attributes:
-    handler: the current RequestHandler
+class Host(object):
+  """Abstract base class for a source code hosting provider, e.g. GitHub.
 
-  Class constants:
-    DOMAIN: string, the source's domain
-    FRONT_PAGE_TEMPLATE: string, the front page child template filename
-    AUTH_URL = string, the url for the "Authenticate" front page link
+  Concrete subclasses must implement search_users() and get_events().
   """
 
-  def __init__(self, handler):
-    self.handler = handler
-
-  def get_activities(self, user_id=None, group_id=None, app_id=None,
-                     activity_id=None, start_index=0, count=0):
-    """Return a total count and list of Codeherenow activities.
-
-    If user_id is provided, only that user's activity(s) are included.
-    start_index and count determine paging, as described in the spec:
-    http://activitystrea.ms/draft-spec.html#anchor14
-
-    app id is just object id
-    http://opensocial-resources.googlecode.com/svn/spec/2.0/Social-Data.xml#appId
-
-    group id is string id of group or @self, @friends, @all
-    http://opensocial-resources.googlecode.com/svn/spec/2.0/Social-Data.xml#Group-ID
+  @staticmethod
+  def search_users(queries):
+    """Returns a sequence of string usernames that match the search queries.
 
     Args:
-      user_id: string object id, defaults to the currently authenticated user
-      group_id: string object id, defaults to the current user's friends
-      app_id: string object id
-      activity_id: string object id
-      start_index: int >= 0
-      count: int >= 0
-
-    Returns:
-      (total_results, activities) tuple
-      total_results: int or None (e.g. if it can't be calculated efficiently)
-      activities: list of activity dicts to be JSON-encoded
+      queries: sequence of strings
     """
     raise NotImplementedError()
 
-  def urlfetch(self, url, **kwargs):
-    """Wraps urlfetch. Passes error responses through to the client.
-
-    ...by raising HTTPException.
+  @staticmethod
+  def get_events(usernames):
+    """Return a sequence of Events for the given usernames.
 
     Args:
-      url: str
-      kwargs: passed through to urlfetch.fetch()
-
-    Returns:
-      the HTTP response body
+      usernames: sequence of strings
     """
-    logging.debug('Fetching %s with kwargs %s', url, kwargs)
-    resp = urlfetch.fetch(url, deadline=999, **kwargs)
+    raise NotImplementedError()
 
-    if resp.status_code == 200:
-      return resp.content
-    else:
-      logging.warning('GET %s returned %d:\n%s',
-                      url, resp.status_code, resp.content)
-      self.handler.response.headers.update(resp.headers)
-      self.handler.response.out.write(resp.content)
-      raise exc.status_map.get(resp.status_code)(resp.content)
 
-  def tag_uri(self, name):
-    """Returns a tag URI string for this source and the given string name.
+class GitHub(Host):
+  """Implements GitHub."""
 
-    Example return value: 'tag:twitter.com,2012:snarfed_org/172417043893731329'
+  SEARCH_URL = 'https://github.com/api/v2/json/user/search/%s'
+  EVENTS_URL = 'https://api.github.com/users/%s/events/public'
 
-    Background on tag URIs: http://taguri.org/
-    """
-    return 'tag:%s,%d:%s' % (self.DOMAIN, datetime.datetime.now().year, name)
+  @staticmethod
+  def search_users(queries):
+    # TODO: parallelize.
+    # https://developers.google.com/appengine/docs/python/urlfetch/asynchronousrequests
+    resps = [GitHub.jsonfetch(GitHub.SEARCH_URL % q) for q in queries]
+    users = itertools.chain(*[r.get('users', []) for r in resps])
+    return set([u['username'] for u in users])
+
+  @staticmethod
+  def get_events(usernames):
+    # TODO: parallelize.
+    return itertools.chain(*[GitHub.jsonfetch(GitHub.EVENTS_URL % u)
+                             for u in usernames])
+
+  @staticmethod
+  def jsonfetch(url):
+    """Wraps util.jsonfetch() and adds the access_token query param."""
+    parsed = list(urlparse.urlparse(url))
+    # query params are in index 4
+    # TODO: when this is on python 2.7, switch to urlparse.parse_qsl
+    params = cgi.parse_qsl(parsed[4]) + [
+        ('access_token', appengine_config.GITHUB_ACCESS_TOKEN)]
+    parsed[4] = urllib.urlencode(params)
+    url = urlparse.urlunparse(parsed)
+    return util.jsonfetch(url)

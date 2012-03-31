@@ -12,17 +12,17 @@ import util
 
 class UtilTest(testutil.HandlerTest):
 
-  def test_urlfetch(self):
-    self.expect_urlfetch('http://my/url', 'hello', foo='bar')
+  def test_jsonfetch(self):
+    self.expect_urlfetch('http://my/url', '["x", "y"]', foo='bar')
     self.mox.ReplayAll()
-    self.assertEquals('hello', util.urlfetch('http://my/url', foo='bar'))
+    self.assertEquals(['x', 'y'], util.jsonfetch('http://my/url', foo='bar'))
 
-  def test_urlfetch_error_passes_through(self):
+  def test_jsonfetch_error_passes_through(self):
     self.expect_urlfetch('http://my/url', 'my error', status=408)
     self.mox.ReplayAll()
 
     try:
-      util.urlfetch('http://my/url')
+      util.jsonfetch('http://my/url')
     except exc.HTTPException, e:
       self.assertEquals(408, e.status_int)
       # self.assertEquals('my error', self.response.body)

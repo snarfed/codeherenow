@@ -4,30 +4,35 @@
 
 __author__ = ['Ryan Barrett <codeherenow@ryanb.org>']
 
+try:
+  import json
+except ImportError:
+  import simplejson as json
 import logging
 
 from webob import exc
 
-from google.appengine.api import urlfetch as gae_urlfetch
+from google.appengine.api import urlfetch
 
 
-def urlfetch(url, **kwargs):
-  """Wraps urlfetch. Passes error responses through to the client.
+def jsonfetch(url, **kwargs):
+  """Wraps urlfetch and converts to JSON.
 
-  ...by raising HTTPException.
+  Passes error responses through to the client by raising HTTPException.
 
   Args:
     url: str
     kwargs: passed through to urlfetch.fetch()
 
   Returns:
-    the HTTP response body
+    JSON object
   """
   logging.debug('Fetching %s with kwargs %s', url, kwargs)
-  resp = gae_urlfetch.fetch(url, deadline=999, **kwargs)
+  resp = urlfetch.fetch(url, deadline=999, **kwargs)
 
   if resp.status_code == 200:
-    return resp.content
+    print '@@ %r' % resp.content
+    return json.loads(resp.content)
   else:
     logging.warning('GET %s returned %d:\n%s',
                     url, resp.status_code, resp.content)

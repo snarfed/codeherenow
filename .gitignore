@@ -10,3 +10,6 @@ twitter_app_key
 twitter_app_secret
 twitter_access_token
 twitter_access_token_secret
+github_app_id
+github_app_secret
+github_access_token

@@ -10,7 +10,6 @@ except ImportError:
   import simplejson as json
 
 import mox
-from webob import exc
 
 import checkins
 import testutil
@@ -37,23 +36,6 @@ TWEET_JSON = {
 #     ]
 TWEET_CHECKIN = checkins.Tweet(tweet=TWEET_JSON)
 # TWEET_CHECKINS = [checkins.Tweet(tweet=TWEET_JSON, user=u) for u in USERS]
-
-
-class SourceTest(testutil.HandlerTest):
-  def test_urlfetch(self):
-    self.expect_urlfetch('http://url', 'hi', foo='bar')
-    self.mox.ReplayAll()
-    self.assertEquals('hi', checkins.Source.urlfetch('http://url', foo='bar'))
-
-  def test_urlfetch_error_passes_through(self):
-    self.expect_urlfetch('http://my/url', 'my error', status=408)
-    self.mox.ReplayAll()
-
-    try:
-      checkins.Source.urlfetch('http://my/url')
-    except exc.HTTPException, e:
-      self.assertEquals(408, e.status_int)
-      self.assertEquals('my error', self.response.body)
 
 
 class TwitterTest(testutil.HandlerTest):

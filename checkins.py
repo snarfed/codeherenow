@@ -7,10 +7,6 @@ __author__ = ['Ryan Barrett <codeherenow@ryanb.org>']
 import cgi
 import datetime
 import itertools
-try:
-  import json
-except ImportError:
-  import simplejson as json
 import logging
 import re
 import urllib
@@ -22,8 +18,8 @@ import tweepy
 import util
 
 
-SEARCH_URL = ('http://search.twitter.com/search.json?'
-              'result_type=recent&include_entities=1&%s')
+TWITTER_SEARCH_URL = ('http://search.twitter.com/search.json?'
+                      'result_type=recent&include_entities=1&%s')
 # USERS_LOOKUP_URL = ('http://api.twitter.com/1/users/lookup.json?'
 #                     'include_entities=true&screen_names=%s')
 
@@ -87,7 +83,7 @@ class Twitter(Source):
       lon: float
       radius_miles: float
     """
-    url = SEARCH_URL % ('geocode=%g,%g,%gmi' % (lat, lon, radius_miles))
+    url = TWITTER_SEARCH_URL % ('geocode=%g,%g,%gmi' % (lat, lon, radius_miles))
     return Twitter.get_tweets(url)
 
   @staticmethod
@@ -97,7 +93,8 @@ class Twitter(Source):
     Args:
       query: string
     """
-    return Twitter.get_tweets(SEARCH_URL % ('q=%s' % urllib.quote_plus(query)))
+    return Twitter.get_tweets(
+        TWITTER_SEARCH_URL % ('q=%s' % urllib.quote_plus(query)))
 
   @staticmethod
   def get_tweets(url):
@@ -109,7 +106,7 @@ class Twitter(Source):
     Returns:
       sequence of Tweets
     """
-    resp = json.loads(Twitter.urlfetch(url)).get('results', {})
+    resp = Twitter.jsonfetch(url).get('results', {})
     # users = Twitter.lookup_users(tweets)
     # return [Tweet(json=tweet, user=users.get(tweet.get(from_user)))
     #         for tweet in resp]
@@ -134,12 +131,12 @@ class Twitter(Source):
   #     return []
 
   #   url = USERS_LOOKUP_URL % ','.join(screen_names)
-  #   resp = json.loads(Twitter.urlfetch(url))
+  #   resp = Twitter.jsonfetch(url)
   #   return dict((user.get('screen_name'), user) for user in resp)
 
   @staticmethod
-  def urlfetch(url, **kwargs):
-    """Wraps util.urlfetch(), signing with OAuth.
+  def jsonfetch(url, **kwargs):
+    """Wraps util.jsonfetch(), signing with OAuth.
     """
     auth = tweepy.OAuthHandler(appengine_config.TWITTER_APP_KEY,
                                appengine_config.TWITTER_APP_SECRET)
@@ -156,7 +153,7 @@ class Twitter(Source):
     logging.info('Signed with OAuth, populated Authorization header: %s',
                  headers.get('Authorization'))
 
-    return util.urlfetch(url, **kwargs)
+    return util.jsonfetch(url, **kwargs)
 
 
 class Tweet(Checkin):
