@@ -63,7 +63,7 @@ EVENTS = [
           },
           'url': 'https://api.github.com/repos/soupmatt/codebreaker/commits/348ac3a2506b2ae5f144add0ad7f684b7cc415ff',
           'distinct': True,
-          'message': 'Chapter 5'
+          'message': 'hacking at #shbp!'
         }
       ],
       'ref': 'refs/heads/master'
@@ -101,7 +101,8 @@ EVENTS = [
       },
       'action': 'created',
     }
-  })]
+  }),
+]
 
 
 class GitHubTest(testutil.HandlerTest):
@@ -109,7 +110,6 @@ class GitHubTest(testutil.HandlerTest):
   def setUp(self):
     super(GitHubTest, self).setUp()
     appengine_config.GITHUB_ACCESS_TOKEN = 'my_token'
-    self.expected_events = [hosts.Event(event=e) for e in EVENTS]
 
   def test_search_users(self):
     for query in 'foo', 'bar':
@@ -120,10 +120,18 @@ class GitHubTest(testutil.HandlerTest):
     self.assert_equals(set(('snarfed', 'alice')),
                        hosts.GitHub.search_users(['foo', 'bar']))
 
-  def test_search_users(self):
+  def test_get_events(self):
     for username, event in zip(['x', 'y'], EVENTS):
       url = 'https://api.github.com/users/%s/events/public?access_token=my_token'
-      self.expect_urlfetch(url % username, json.dumps(event.json))
+      self.expect_urlfetch(url % username, json.dumps([event.json]))
     self.mox.ReplayAll()
 
-    self.assert_equals(EVENTS, list(hosts.GitHub.get_events(['x', 'y'])))
+    # ugh, this is really flaky, but can't figure out why. expected and actual
+    # objects are identical and in same order.
+    self.assert_equals(EVENTS, hosts.GitHub.get_events(['x', 'y']))
+
+  def test_search_recent_events(self):
+    self.expect_urlfetch('https://api.github.com/events?access_token=my_token',
+                         json.dumps([e.json for e in EVENTS]))
+    self.mox.ReplayAll()
+    self.assertEquals([EVENTS[0]], hosts.GitHub.search_recent_events('#shbp'))

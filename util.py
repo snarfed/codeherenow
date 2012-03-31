@@ -25,6 +25,9 @@ class Struct(object):
   def __eq__(self, other):
     return vars(self) == vars(other)
 
+  def __repr__(self):
+    return repr(vars(self))
+
 
 def jsonfetch(url, **kwargs):
   """Wraps urlfetch and converts to JSON.
@@ -42,7 +45,6 @@ def jsonfetch(url, **kwargs):
   resp = urlfetch.fetch(url, deadline=999, **kwargs)
 
   if resp.status_code == 200:
-    print '@@ %r' % resp.content
     return json.loads(resp.content)
   else:
     logging.warning('GET %s returned %d:\n%s',

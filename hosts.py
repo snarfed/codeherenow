@@ -21,7 +21,22 @@ class Event(util.Struct):
   Attributes:
     json: JSON dict
   """
-  pass
+
+  def message(self):
+    """Extracts and returns the human-readable string message for this event."""
+    type = self.json['type']
+    payload = self.json['payload']
+
+    # TODO: unit tests for more of these
+    # TODO: PullRequestReviewCommentEvent, CommitCommentEvent
+    if type == 'PushEvent':
+      return '\n'.join(c['message'] for c in payload['commits'])
+    elif type == 'IssuesEvent':
+      return '\n'.join(payload['issue']['labels'] + [payload['issue']['body']])
+    elif type == 'IssueCommentEvent':
+      return payload['comment']['body']
+    elif type == 'PullRequestEvent':
+      return payload['pull_request']['body']
 
 
 class Host(object):
@@ -48,12 +63,22 @@ class Host(object):
     """
     raise NotImplementedError()
 
+  @staticmethod
+  def search_recent_events(phrase):
+    """Return recent events with the given phrase in their message.
+
+    Args:
+      phrase: string
+    """
+    raise NotImplementedError()
+
 
 class GitHub(Host):
   """Implements GitHub."""
 
   SEARCH_URL = 'https://github.com/api/v2/json/user/search/%s'
-  EVENTS_URL = 'https://api.github.com/users/%s/events/public'
+  USER_EVENTS_URL = 'https://api.github.com/users/%s/events/public'
+  EVENTS_URL = 'https://api.github.com/events'
 
   @staticmethod
   def search_users(queries):
@@ -66,8 +91,14 @@ class GitHub(Host):
   @staticmethod
   def get_events(usernames):
     # TODO: parallelize.
-    events = [GitHub.jsonfetch(GitHub.EVENTS_URL % u) for u in usernames]
+    events = [GitHub.jsonfetch(GitHub.USER_EVENTS_URL % u) for u in usernames]
     return [Event(json=e) for e in itertools.chain(*events)]
+
+  @staticmethod
+  def search_recent_events(phrase):
+    events_json = GitHub.jsonfetch(GitHub.EVENTS_URL)
+    events = [Event(json=e) for e in events_json]
+    return [e for e in events if phrase in e.message()]
 
   @staticmethod
   def jsonfetch(url):
