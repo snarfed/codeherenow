@@ -2,11 +2,11 @@ Code Here Now is a scrolling ticker of source code checkins made by people
 recently at a specific place. It's good for hackathons, conferences, etc. It
 also includes current local Twitter posts, Flickr photos, etc.
 
-It's currently deployed at:
+It's *very hacky* and *not finished* yet! Having said that, it's deployed at:
 
 http://codeherenow.appspot.com/
 
-Source: https://github.com/snarfed/activitystreams-unofficial
-Contact: Ryan Barrett <activitystreams@ryanb.org>
+Source: https://github.com/snarfed/codeherenow
+Contact: Ryan Barrett <codeherenow@ryanb.org>
 
 Code Here Now is in the public domain.
