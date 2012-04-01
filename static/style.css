@@ -2,20 +2,20 @@
  * Stylesheet for the front page, mostly the demo form.
  */
 
-div#description {
-  max-width: 700px;
+div.gravatar img {
+  padding: 2px;
+  border: 1px solid lightgray;
+  float: left;
+  margin: 1em;
 }
 
-img#logo {
-  float: right;
+ul, li, div.message, blockquote {
+  list-style: none;
+  display: inline;
 }
 
-select, input[type=text] {
-  border: 1px solid gray;
-}
-
-iframe {
-  width: 100%;
-  min-height: 40em;
-  border: 1px solid gray;
+hr {
+  clear: both;
+  margin: 1em;
+  color: lightgray;
 }

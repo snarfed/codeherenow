@@ -26,19 +26,29 @@ class Event(util.Struct):
     """Extracts and returns the human-readable string message for this event."""
     type = self.json['type']
     payload = self.json['payload']
+    message = ''
 
     # TODO: unit tests for more of these
     # TODO: PullRequestReviewCommentEvent, CommitCommentEvent
     if type == 'PushEvent':
-      return '\n'.join(c['message'] for c in payload['commits'])
+      message = '\n'.join(c['message'] for c in payload['commits'])
     elif type == 'IssuesEvent':
-      return '\n'.join(payload['issue']['labels'] + [payload['issue']['body']])
+      # this doesn't work. labels is a dict?!?
+      # message = '\n'.join(payload['issue']['labels'] + [payload['issue']['body']])
+      message = payload['issue']['body']
     elif type == 'IssueCommentEvent':
-      return payload['comment']['body']
+      message = payload['comment']['body']
     elif type == 'PullRequestEvent':
-      return payload['pull_request']['body']
+      message = payload['pull_request']['body']
 
-    return None
+    return unicode(message)
+
+  def template_file(self):
+    """Returns the string filename of the template for rendering this event."""
+    type = self.json['type']
+    if type.endswith('Event'):
+      type = type[:-5]
+    return 'templates/github_%s.html' % type.lower()
 
   def __eq__(self, other):
     return self.json == other.json
@@ -72,11 +82,11 @@ class Host(object):
     raise NotImplementedError()
 
   @staticmethod
-  def search_recent_events(phrase):
-    """Return recent events with the given phrase in their message.
+  def search_recent_events(phrases):
+    """Return recent events with any of the given phrases in their message.
 
     Args:
-      phrase: string
+      phrases: sequence of strings
     """
     raise NotImplementedError()
 
@@ -103,11 +113,15 @@ class GitHub(Host):
     return [Event(json=e) for e in itertools.chain(*events)]
 
   @staticmethod
-  def search_recent_events(phrase):
+  def search_recent_events(phrases):
     events_json = GitHub.jsonfetch(GitHub.EVENTS_URL)
     events = [Event(json=e) for e in events_json]
-    logging.warning('@@ %r' % e.message())
-    return [e for e in events if phrase in str(e.message())]
+    def any_query_matches(event):
+      return any(p in event.message() for p in phrases)
+
+    # TODO: revert
+    # return [e for e in events if any_query_matches(e)]
+    return [e for e in events if e.message()]
 
   @staticmethod
   def jsonfetch(url):

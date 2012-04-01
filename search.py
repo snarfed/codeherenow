@@ -19,6 +19,12 @@ import util
 from google.appengine.ext.webapp.util import run_wsgi_app
 from google.appengine.ext.webapp import template
 
+  # <link href="https://a248.e.akamai.net/assets.github.com/stylesheets/bundles/github-e2fb92c4dcb5e5b1ce2ffd0e84d6bf80937d9197.css" media="screen" rel="stylesheet" type="text/css" />
+  # <link href="https://a248.e.akamai.net/assets.github.com/stylesheets/bundles/github2-98a6177ed18ac7b415e311fdb34652f17ad0038c.css" media="screen" rel="stylesheet" type="text/css" />
+
+  # <script src="https://a248.e.akamai.net/assets.github.com/javascripts/bundles/jquery-225576cef50ef2097c9f9fbcd8953c1572544611.js" type="text/javascript"></script>
+  # <script src="https://a248.e.akamai.net/assets.github.com/javascripts/bundles/github-353ded132c604f1bdf010516392d71052f37ffcf.js" type="text/javascript"></script>
+
 HEADER = """
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
@@ -29,13 +35,21 @@ HEADER = """
   <script type="text/javascript" src="/static/ticker.js"></script>
   <link href="/static/style.css" rel="stylesheet" type="text/css" />
   <title>Super Happy Code!</title>
+
 </head>
 
 <body onload="">
-<h1>Super Happy Code</h1>
+<h1>Super Happy Code!</h1>
+<h2>(GitHub checkins here now)</h2>
+
+<body class="logged_in page-profile mine linux  env-production " data-blob-contribs-enabled="yes">
+<div id="wrapper">
+<div class="last">
 """
 
 FOOTER = """
+</div>
+</div>
 </body>
 </html>
 """
@@ -109,13 +123,12 @@ class Ticker(Handler):
     LAT = 37.442796
     LON = -122.161466
     RADIUS = 0.5
-    QUERY = 'shbp'
+    PHRASES = ('shbp',)
 
     self.response.out.write(HEADER)
     for host in self.HOSTS:
-      for events in host.search_recent_events(QUERY):
-        self.response.out.write(template.render('templates/host-meta.xrds',
-                                                event.json))
+      for event in host.search_recent_events(PHRASES):
+        self.response.out.write(template.render(event.template_file(), event.json))
     self.response.out.write(FOOTER)
 
 
