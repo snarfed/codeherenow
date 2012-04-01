@@ -1,0 +1,90 @@
+commit ticker
+===
+join checkins and committers to github, google code, sf.net, etc and display both
+
+probably start with checkins and then search for commits?
+
+ask for spy source!
+
+triggers
+--
+superhappyblockparty, sbhp, hashtags, etc
+join on real name, username.
+
+search:
+http://develop.github.com/p/users.html
+https://dev.twitter.com/docs/api/1/get/search
+http://www.flickr.com/services/api/flickr.people.findByEmail.html
+http://www.flickr.com/services/api/flickr.people.findByUsername.html
+
+checkins
+--
+twitter: doable!
+https://dev.twitter.com/docs/api/1/get/search
+e.g. 'http://search.twitter.com/search.json?geocode=37.781157,-122.398720,1mi'
+
+flickr:
+http://www.flickr.com/services/api/flickr.photos.search.html
+
+fb: meh, maybe? not checkins specifically, they need auth, but...
+https://developers.facebook.com/docs/reference/api/#searching
+e.g. https://graph.facebook.com/search?type=location&center=37.76,-122.427&distance=1000
+
+checkins, no: https://developers.facebook.com/docs/reference/api/checkin/
+
+https://developers.facebook.com/docs/reference/api/#searching
+
+4sq: not great, no public feeds. hacks:
+twitter-based: http://stackoverflow.com/questions/8206849/how-to-crawl-foursquare-check-in-data
+venue-based, but need oauth access from venue owner: https://developer.foursquare.com/docs/realtime.html
+https://developer.foursquare.com/docs/
+
+
+
+repos
+--
+github:
+real time public api: http://developer.github.com/v3/events/
+http://developer.github.com/v3/
+e.g. wget https://api.github.com/events
+
+get an access token: from http://developer.github.com/v3/oauth/ ...
+
+https://github.com/login/oauth/authorize?client_id=...
+got: http://codeherenow.appspot.com/github_oauth_callback?code=...
+
+curl -v -d 'client_id=...&client_secret=...' \
+  https://github.com/login/oauth/access_token
+got: access_token=...&token_type=bearer
+
+
+stack overflow: events feed
+https://api.stackexchange.com/docs
+
+no:
+--
+gitorious: couldn't find anything
+
+google code: issue tracker only
+http://code.google.com/p/support/wiki/IssueTrackerAPI
+
+sf.net: couldn't find anything
+https://sourceforge.net/apps/trac/sourceforge/wiki/WikiStart
+
+codeplex: only per project
+http://codeplex.codeplex.com/wikipage?title=CodePlexWebServices&referringTitle=CodePlexAPI
+
+ohloh: not real time
+http://meta.ohloh.net/getting_started/
+
+
+similar image search?
+===
+find pictures that look like pictures both *at* shbp and of the area in pa *before* shbp (ie normal). display both with locations and metadata.
+
+http://stackoverflow.com/questions/3356422/google-image-search-search-similar-images
+http://stackoverflow.com/questions/533857/whats-the-best-web-image-search-api
+https://api.tineye.com/documentation
+https://developers.google.com/image-search/v1/jsondevguide
+
+...bleh. tried to figure out usable URLs for scraping google similar image search, finally gave up.

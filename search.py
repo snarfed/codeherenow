@@ -32,6 +32,7 @@ HEADER = """
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
   <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+  <meta http-equiv="refresh" content="30" />
   <script type="text/javascript" src="/static/ticker.js"></script>
   <link href="/static/style.css" rel="stylesheet" type="text/css" />
   <title>Super Happy Code!</title>
@@ -40,7 +41,7 @@ HEADER = """
 
 <body onload="">
 <h1>Super Happy Code!</h1>
-<h2>(GitHub checkins here now)</h2>
+<h3>(GitHub checkins happening right here, right now)</h3>
 
 <body class="logged_in page-profile mine linux  env-production " data-blob-contribs-enabled="yes">
 <div id="wrapper">
